@@ -1,7 +1,9 @@
 import os
 import discord
 from discord.ext import commands
-import requests
+from google import genai
+
+ai_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -14,27 +16,25 @@ async def on_ready():
 
 @bot.command(name="سولف")
 async def chat(ctx, *, message: str):
-    api_key = os.getenv("GEMINI_API_KEY")
-    # استخدام الموديل اللي طلبته قوقل بنفسها في الصورة
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={api_key}"
+    # محاولة استخدام النموذج الأساسي، وإذا واجه ضغط نجرب موديل بديل
+    models_to_try = ['gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
     
-    headers = {"Content-Type": "application/json"}
-    data = {
-        "contents": [{"parts": [{"text": message}]}]
-    }
-    
-    try:
-        response = requests.post(url, json=data, headers=headers)
-        res_json = response.json()
-        
-        if "candidates" in res_json:
-            reply = res_json['candidates'][0]['content']['parts'][0]['text']
-            await ctx.send(reply)
-        else:
-            error_msg = res_json.get('error', {}).get('message', 'خطأ غير معروف')
-            await ctx.send(f"رد قوقل: {error_msg}")
+    reply = None
+    for model_name in models_to_try:
+        try:
+            response = ai_client.models.generate_content(
+                model=model_name,
+                contents=message,
+            )
+            if response and response.text:
+                reply = response.text
+                break
+        except Exception as e:
+            continue
             
-    except Exception as e:
-        await ctx.send(f"خطأ في النظام: {str(e)[:100]}")
+    if reply:
+        await ctx.send(reply)
+    else:
+        await ctx.send("يا طويل العمر سيرفرات قوقل زحمة ضغط عالي، جرب بعد ثانية وتضبط!")
 
 bot.run(os.getenv("DISCORD_TOKEN"))
