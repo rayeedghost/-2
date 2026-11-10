@@ -1,7 +1,10 @@
 import os
 import discord
 from discord.ext import commands
-import requests
+from google import genai
+
+# تهيئة عميل قوقل بالشكل الصحيح
+ai_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -14,28 +17,17 @@ async def on_ready():
 
 @bot.command(name="سولف")
 async def chat(ctx, *, message: str):
-    api_key = os.getenv("GEMINI_API_KEY")
-    
-    # استخدام الموديل اللي طلبته قوقل بنفسها في رسالة الخطأ الأخيرة
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={api_key}"
-    
-    headers = {"Content-Type": "application/json"}
-    data = {
-        "contents": [{"parts": [{"text": message}]}]
-    }
-    
     try:
-        response = requests.post(url, json=data, headers=headers)
-        res_json = response.json()
-        
-        if "candidates" in res_json:
-            reply = res_json['candidates'][0]['content']['parts'][0]['text']
-            await ctx.send(reply)
+        # استخدام الموديل القياسي السريع والمستقر
+        response = ai_client.models.generate_content(
+            model='gemini-1.5-flash',
+            contents=message,
+        )
+        if response and response.text:
+            await ctx.send(response.text)
         else:
-            error_msg = res_json.get('error', {}).get('message', 'خطأ غير معروف')
-            await ctx.send(f"رد قوقل: {error_msg}")
-            
+            await ctx.send("البوت استلم رسالتك بس ما رجع رد!")
     except Exception as e:
-        await ctx.send(f"خطأ في الاتصال: {str(e)[:100]}")
+        await ctx.send(f"خطأ: {str(e)[:120]}")
 
 bot.run(os.getenv("DISCORD_TOKEN"))
