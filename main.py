@@ -15,8 +15,8 @@ async def on_ready():
 @bot.command(name="سولف")
 async def chat(ctx, *, message: str):
     api_key = os.getenv("GEMINI_API_KEY")
-    # استخدام النموذج المتاح والمعتمد حالياً
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
+    # استخدام الموديل اللي طلبته قوقل بنفسها في الصورة
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={api_key}"
     
     headers = {"Content-Type": "application/json"}
     data = {
