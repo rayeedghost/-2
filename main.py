@@ -1,7 +1,10 @@
 import os
 import discord
 from discord.ext import commands
-import requests
+from google import genai
+
+# تشغيل العميل بالطريقة الرسمية الجديدة
+ai_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -14,27 +17,22 @@ async def on_ready():
 
 @bot.command(name="سولف")
 async def chat(ctx, *, message: str):
-    api_key = os.getenv("GEMINI_API_KEY")
-    # استخدام إصدار v1 المستقر مع نموذج فلاش
-    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
-    
-    headers = {"Content-Type": "application/json"}
-    data = {
-        "contents": [{"parts": [{"text": message}]}]
-    }
-    
     try:
-        response = requests.post(url, json=data, headers=headers)
-        res_json = response.json()
-        
-        if "candidates" in res_json:
-            reply = res_json['candidates'][0]['content']['parts'][0]['text']
-            await ctx.send(reply)
-        else:
-            error_msg = res_json.get('error', {}).get('message', 'خطأ في الاستجابة')
-            await ctx.send(f"رد قوقل: {error_msg}")
-            
+        # استخدام الطريقة الآمنة الرسمية اللي تختصر وجع رأس الروابط
+        response = ai_client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=message,
+        )
+        await ctx.send(response.text)
     except Exception as e:
-        await ctx.send(f"خطأ في النظام: {str(e)[:100]}")
+        # لو واجهنا أي ضغط أو خطأ، نجرب النموذج البديل الفوري
+        try:
+            response = ai_client.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=message,
+            )
+            await ctx.send(response.text)
+        except Exception as ex:
+            await ctx.send("يا طويل العمر سيرفرات قوقل زحمة اليوم، جرب مرة ثانية بعد شوي!")
 
 bot.run(os.getenv("DISCORD_TOKEN"))
