@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 from google import genai
 
-# إعداد قوقل جيميناي بنموذج سريع ومستقر
+# إعداد عميل قوقل جيميناي
 ai_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 intents = discord.Intents.default()
@@ -17,9 +17,9 @@ async def on_ready():
 
 @bot.command(name="سولف")
 async def chat(ctx, *, message: str):
-    # إرسال الرسالة باستخدام نموذج خفيف وسريع الاستجابة
+    # استخدام النموذج الافتراضي المدعوم رسمياً من المكتبة الجديدة
     response = ai_client.models.generate_content(
-        model='gemini-1.5-flash',
+        model='gemini-2.5-flash',
         contents=message,
     )
     await ctx.send(response.text)
