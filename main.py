@@ -16,25 +16,34 @@ async def on_ready():
 
 @bot.command(name="سولف")
 async def chat(ctx, *, message: str):
-    # محاولة استخدام النموذج الأساسي، وإذا واجه ضغط نجرب موديل بديل
-    models_to_try = ['gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
-    
     reply = None
-    for model_name in models_to_try:
+    
+    # نجرب أولاً النموذج السريع
+    try:
+        response = ai_client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=message,
+        )
+        if response and response.text:
+            reply = response.text
+    except Exception as e:
+        pass
+
+    # إذا ما رد، نجرب النموذج البديل فوراً
+    if not reply:
         try:
             response = ai_client.models.generate_content(
-                model=model_name,
+                model='gemini-1.5-flash',
                 contents=message,
             )
             if response and response.text:
                 reply = response.text
-                break
         except Exception as e:
-            continue
-            
+            pass
+
     if reply:
         await ctx.send(reply)
     else:
-        await ctx.send("يا طويل العمر سيرفرات قوقل زحمة ضغط عالي، جرب بعد ثانية وتضبط!")
+        await ctx.send("يا طويل العمر سيرفرات قوقل قافلة اليوم، جرب مرة ثانية بعد شوي!")
 
 bot.run(os.getenv("DISCORD_TOKEN"))
