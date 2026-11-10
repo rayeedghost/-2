@@ -15,25 +15,25 @@ async def on_ready():
 @bot.command(name="سولف")
 async def chat(ctx, *, message: str):
     api_key = os.getenv("GEMINI_API_KEY")
-    # استخدام الرابط المباشر المستقر تماماً
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-
+    # استخدام النموذج المتاح والمعتمد حالياً
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
+    
     headers = {"Content-Type": "application/json"}
     data = {
         "contents": [{"parts": [{"text": message}]}]
     }
-
+    
     try:
         response = requests.post(url, json=data, headers=headers)
         res_json = response.json()
-
+        
         if "candidates" in res_json:
             reply = res_json['candidates'][0]['content']['parts'][0]['text']
             await ctx.send(reply)
         else:
             error_msg = res_json.get('error', {}).get('message', 'خطأ غير معروف')
             await ctx.send(f"رد قوقل: {error_msg}")
-
+            
     except Exception as e:
         await ctx.send(f"خطأ في النظام: {str(e)[:100]}")
 
