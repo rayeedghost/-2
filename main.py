@@ -1,6 +1,10 @@
 import os
 import discord
 from discord.ext import commands
+from google import genai
+
+# إعداد قوقل جيميناي
+ai_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -9,10 +13,15 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"تم تسجيل الدخول بنجاح، البوت شغال باسم: {bot.user}")
+    print(f"البوت اشتغل وصار ذكي باسم: {bot.user}")
 
 @bot.command(name="سولف")
 async def chat(ctx, *, message: str):
-    await ctx.send(f"أهلاً بك! وصلني كلامك: '{message}'، وجاهز أسولف معك.")
+    # إرسال الرسالة للذكاء الاصطناعي واستقبال الرد
+    response = ai_client.models.generate_content(
+        model='gemini-2.5-flash',
+        contents=message,
+    )
+    await ctx.send(response.text)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
