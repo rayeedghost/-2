@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 from google import genai
 
-# إعداد قوقل جيميناي بالنموذج المحدث
+# إعداد قوقل جيميناي بنموذج سريع ومستقر
 ai_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 intents = discord.Intents.default()
@@ -13,13 +13,13 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"البوت اشتغل وصار ذكي باسم: {bot.user}")
+    print(f"البوت اشتغل وصار جاهز باسم: {bot.user}")
 
 @bot.command(name="سولف")
 async def chat(ctx, *, message: str):
-    # إرسال الرسالة للذكاء الاصطناعي واستقبال الرد باستخدام النموذج الأحدث
+    # إرسال الرسالة باستخدام نموذج خفيف وسريع الاستجابة
     response = ai_client.models.generate_content(
-        model='gemini-3.8-flash',
+        model='gemini-1.5-flash',
         contents=message,
     )
     await ctx.send(response.text)
