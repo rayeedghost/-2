@@ -17,21 +17,16 @@ async def on_ready():
 @bot.command(name="سولف")
 async def chat(ctx, *, message: str):
     try:
-        # نستخدم نموذج واحد ونخليه يركز ويعطيك رد حقيقي بدون هبد
+        # استخدام موديل 1.5 الفلاش المعتمد والمستقر
         response = ai_client.models.generate_content(
-            model='gemini-2.0-flash',
+            model='gemini-1.5-flash',
             contents=message,
         )
         if response and response.text:
             await ctx.send(response.text)
         else:
-            await ctx.send("قُمّ صامت... قوقل ما رجعت نص بالرد.")
+            await ctx.send("البوت رد بس بدون نص!")
     except Exception as e:
-        # نطبع جزء من الخطأ الحقيقي عشان نعرف هل هي زحمة ولا مفتاح ولا ايش بالضبط
-        error_str = str(e)
-        if "429" in error_str or "ResourceExhausted" in error_str:
-            await ctx.send("خلصت حصة الـ API المجانية المؤقتة، اصبر دقيقة وتعال!")
-        else:
-            await ctx.send(f"خطأ قوقل: {error_str[:120]}")
+        await ctx.send(f"خطأ: {str(e)[:120]}")
 
 bot.run(os.getenv("DISCORD_TOKEN"))
