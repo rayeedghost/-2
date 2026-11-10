@@ -15,8 +15,8 @@ async def on_ready():
 @bot.command(name="سولف")
 async def chat(ctx, *, message: str):
     api_key = os.getenv("GEMINI_API_KEY")
-    # استخدام النموذج المحدث والمطلوب رسمياً من قوقل
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={api_key}"
+    # استخدام نموذج آخر مستقر وسريع لتفادي الضغط
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
     
     headers = {"Content-Type": "application/json"}
     data = {
@@ -31,7 +31,7 @@ async def chat(ctx, *, message: str):
             reply = res_json['candidates'][0]['content']['parts'][0]['text']
             await ctx.send(reply)
         else:
-            error_msg = res_json.get('error', {}).get('message', 'خطأ غير معروف')
+            error_msg = res_json.get('error', {}).get('message', 'خطأ ضغط السيرفرات')
             await ctx.send(f"رد قوقل: {error_msg}")
             
     except Exception as e:
